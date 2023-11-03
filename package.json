@@ -1,0 +1,38 @@
+{
+  "name": "derivable-rank-tools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "npx ts-node --files src/index.ts" ,
+    "build": "tsc",
+    "pretty": "prettier --write \"./src/**/*.ts\""
+  },
+  "author": "Derivable Labs",
+  "license": "MIT",
+  "dependencies": {
+    "@ethersproject/providers": "https://gitpkg.now.sh/derivable-labs/ethers.js/packages/providers?master",
+    "assisted-json-rpc-provider": "git+ssh://git@github.com:derivable-labs/AssistedJsonRpcProvider.git#dev",
+    "dotenv": "^16.3.1",
+    "ethereum-multicall": "^2.15.0",
+    "ethers": "^5.5.4",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.1",
+    "@typescript-eslint/eslint-plugin": "^2.26.0",
+    "@typescript-eslint/parser": "^2.26.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-config-standard-react": "^9.2.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-standard": "^4.0.1",
+    "prettier": "2.8.8",
+    "typescript": "4"
+  }
+}
