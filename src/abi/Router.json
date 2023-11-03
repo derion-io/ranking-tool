@@ -1,0 +1,211 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "weth",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "poolFactory",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "feeRecipient",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "referrer",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "Referred",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "POOL_FACTORY",
+    "outputs": [
+      {
+        "internalType": "contract IPoolFactory",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "exhaust",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "pool",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fee10000",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "referrer",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct Router.Order",
+        "name": "order",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "idIn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "idOut",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountIn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amountOutMin",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Router.Step[]",
+        "name": "steps",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "multiSwap",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "amountOuts",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasLeft",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pair",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "mainToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "otherToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountMainDesired",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountOtherMax",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fee10000",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "swapToLP",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "gasLeft",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

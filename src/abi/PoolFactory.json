@@ -1,0 +1,239 @@
+[
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "utr",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "logic",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "oracle",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "reserveToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mark",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "initTime",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "halfLife",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "k",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "a",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "b",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Params",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "computePoolAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "utr",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "logic",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "oracle",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "reserveToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mark",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "initTime",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "halfLife",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "k",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "a",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "b",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Params",
+        "name": "params",
+        "type": "tuple"
+      }
+    ],
+    "name": "createPool",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "pool",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getParams",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "utr",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "logic",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "oracle",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "reserveToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mark",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint32",
+            "name": "initTime",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "halfLife",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "k",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "a",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "b",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Params",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
