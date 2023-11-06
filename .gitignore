@@ -2,3 +2,4 @@ node_modules
 .idea
 .env
 yarn-error.log
+logs.json
