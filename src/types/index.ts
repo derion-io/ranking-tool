@@ -19,6 +19,7 @@ export interface INetworkConfig {
   nativePriceUSD: number
   stablecoins: string[]
   tokens?: { [address: string]: { price?: number; symbol: string; name: string; decimals: number; logo: string } }
+  fetchers?: { [address: string]: { type: string; factory: string[] } }
   helperContract: IHelperContract
   uniswap: IUniswapContractAddress
   derivable: IDerivableContractAddress
@@ -89,7 +90,7 @@ export type StatesType = {
   config: any
 }
 
-export type PoolType = {
+export type IPool = {
   UTR: string
   TOKEN: string
   MARK: BigNumber
@@ -125,4 +126,22 @@ export type PoolType = {
   window: BigNumber
 }
 
-export type PoolsType = { [key: string]: PoolType }
+export type IPriceInfo = {
+  [pool: string]: {
+    twap: BigNumber
+    spot: BigNumber
+  }
+}
+
+export type IPoolsConfig = {
+  [pool: string]: {
+    fetcher: string
+    oracle: string
+    type: 'uni2' | 'uni3'
+    QTI: 0 | 1
+  }
+}
+export type IPoolsSpot = {
+  [pool: string]: string
+}
+export type IPoolsType = { [key: string]: IPool }
