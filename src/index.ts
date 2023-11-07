@@ -1,9 +1,9 @@
+import { BigNumber } from 'ethers'
 import fs from 'fs'
 import logsCache from '../logs.json'
-import { CHAIN_ID, PLD_ADDRESS, POSITION_ADDRESS, Z2_ADDRESS, ZERO_ADDRESS, loadConfig } from './config'
-import { ILog } from './types'
+import { CHAIN_ID, PLD_ADDRESS, POSITION_ADDRESS, Z2_ADDRESS, loadConfig } from './config'
 import { getRPC } from './helper/rpc'
-import { BigNumber } from 'ethers'
+import { ILog } from './types'
 import { bn, decodeERC1155TransferLog, decodeERC20TransferLog, num } from './utils/utils'
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62'
@@ -32,7 +32,7 @@ const main = async () => {
   }, {})
   const participations: string[] = []
   const illegalParticipations: { address: String; reason: String; txHash: String }[] = []
-  const participationsValue: { [address: string]: { [pool: string]: { [side: string]: number } } } = {}
+  const participationsValue: { [address: string]: { [pool: string]: { [side: string]: BigNumber } } } = {}
   Object.keys(logGroups).map((key) => {
     const logGroup = logGroups[key]
     if (logGroup.length === 1 && logGroup[0].topics[0] === ERC20_TRANSFER_TOPIC) {
@@ -68,17 +68,19 @@ const main = async () => {
         // TODO:  Value must be BigNumber
         const side = '0x' + id._hex.slice(2, 4)
         const poolAddress = '0x' + id._hex.slice(4)
+
         const paths = [from, to]
         paths.forEach((path) => {
           if (!participationsValue[path]) participationsValue[path] = {}
           if (!participationsValue[path][poolAddress]) participationsValue[path][poolAddress] = {}
-          if (!participationsValue[path][poolAddress][side]) participationsValue[path][poolAddress][side] = num(value)
+          if (!participationsValue[path][poolAddress][side]) participationsValue[path][poolAddress][side] = bn(0)
         })
-        participationsValue[from][poolAddress][side] -= num(value)
-        participationsValue[to][poolAddress][side] += num(value)
+        participationsValue[from][poolAddress][side] = participationsValue[from][poolAddress][side].sub(value)
+        participationsValue[to][poolAddress][side] = participationsValue[to][poolAddress][side].add(value)
       })
     }
   })
-  console.log(participations[0], participationsValue[participations[0]])
+  console.log(participationsValue)
+  console.log(participations[2], participationsValue[participations[2]]['0x446fed921f27fb001766cd4ac66ab866a22234eb']['0x10'].toString())
 }
 main()
