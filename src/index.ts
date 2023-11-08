@@ -10,7 +10,7 @@ import { ILog, IPoolsCompute, IPoolsConfig, IPoolsSpot } from './types'
 import { IEW, bn, decodeERC1155TransferLog, decodeERC20TransferLog, num, parseMultiCallResponse } from './utils/utils'
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62'
-const main = async () => {
+export const getRank = async () => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
   const currentBlock = 39305800
@@ -191,12 +191,9 @@ const main = async () => {
     })
   })
   arraya.sort((a, b) => num(b.balance) - num(a.balance))
-
-  arraya.map((a) => {
-    console.log(a.address, num(a.balance))
-  })
+  console.log(arraya)
+  return arraya
 }
-main()
 
 // 0xd1f294227ed930993098914e829a176b6b1905d2
 // 0x03342265f292ac143f9c79dfee076332ae05769e
