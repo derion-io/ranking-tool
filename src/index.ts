@@ -1,19 +1,19 @@
+import { Multicall } from 'ethereum-multicall'
 import { BigNumber } from 'ethers'
 import fs from 'fs'
+import { uniq } from 'lodash'
 import logsCache from '../logs.json'
-import { CHAIN_ID, PLD_ADDRESS, POSITION_ADDRESS, Z2_ADDRESS, ZERO_ADDRESS, loadConfig } from './config'
+import { CHAIN_ID, PLD_ADDRESS, POOL_IDS, POSITION_ADDRESS, Z2_ADDRESS, ZERO_ADDRESS, loadConfig } from './config'
+import { getMultiCallCompute, getMultiCallConfig, getMultiCallPrice } from './helper/resource'
 import { getRPC } from './helper/rpc'
-import { ILog, IPoolsConfig, IPoolsSpot } from './types'
-import _ from 'lodash'
-import { bn, decodeERC1155TransferLog, decodeERC20TransferLog, num } from './utils/utils'
-import { getMultiCallConfig, getMultiCallPrice } from './helper/resource'
-import { ContractCallContext, Multicall } from 'ethereum-multicall'
+import { ILog, IPoolsCompute, IPoolsConfig, IPoolsSpot } from './types'
+import { IEW, bn, decodeERC1155TransferLog, decodeERC20TransferLog, num, parseMultiCallResponse } from './utils/utils'
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62'
 const main = async () => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
-  const currentBlock = await provider.getBlockNumber()
+  const currentBlock = 39305800
   let logs: ILog[] = logsCache || []
   if (logsCache.length === 0) {
     logs = await provider.getLogs({
@@ -27,16 +27,24 @@ const main = async () => {
     const filePath = 'logs.json'
     fs.writeFileSync(filePath, jsonData)
   }
+  const erc20Balance: { [address: string]: BigNumber } = {}
   const logGroups: { [txHash: string]: ILog[] } = logs.reduce((result: any, log) => {
     if (!result[log.transactionHash]) {
       result[log.transactionHash] = []
+    }
+    if (log.topics[0] === ERC20_TRANSFER_TOPIC) {
+      const dLog = decodeERC20TransferLog(log)
+      if (!erc20Balance[dLog.from]) erc20Balance[dLog.from] = bn(0)
+      if (!erc20Balance[dLog.to]) erc20Balance[dLog.to] = bn(0)
+      erc20Balance[dLog.from] = erc20Balance[dLog.from].sub(dLog.value)
+      erc20Balance[dLog.to] = erc20Balance[dLog.to].add(dLog.value)
     }
     result[log.transactionHash].push(log)
     return result
   }, {})
   const participations: string[] = []
   const illegalParticipations: { address: String; reason: String; txHash: String }[] = []
-  const participationsValue: { [address: string]: { [pool: string]: { [side: string]: BigNumber } } } = {}
+  const participationsBalance: { [address: string]: { [pool: string]: { [side: string]: BigNumber } } } = {}
   Object.keys(logGroups).map((key) => {
     const logGroup = logGroups[key]
     if (logGroup.length === 1 && logGroup[0].topics[0] === ERC20_TRANSFER_TOPIC) {
@@ -74,45 +82,55 @@ const main = async () => {
 
         const paths = [from, to]
         paths.forEach((path) => {
-          if (!participationsValue[path]) {
-            participationsValue[path] = {}
+          if (!participationsBalance[path]) {
+            participationsBalance[path] = {}
           }
-          if (!participationsValue[path][poolAddress]) {
-            participationsValue[path][poolAddress] = {}
+          if (!participationsBalance[path][poolAddress]) {
+            participationsBalance[path][poolAddress] = {}
           }
-          if (!participationsValue[path][poolAddress][side]) {
-            participationsValue[path][poolAddress][side] = bn(0)
+          if (!participationsBalance[path][poolAddress][side]) {
+            participationsBalance[path][poolAddress][side] = bn(0)
           }
         })
-        participationsValue[from][poolAddress][side] = participationsValue[from][poolAddress][side].sub(value)
-        participationsValue[to][poolAddress][side] = participationsValue[to][poolAddress][side].add(value)
+        participationsBalance[from][poolAddress][side] = participationsBalance[from][poolAddress][side].sub(value)
+        participationsBalance[to][poolAddress][side] = participationsBalance[to][poolAddress][side].add(value)
       })
     }
   })
+  // console.log(participationsBalance['0xd5277a33d1109842128852854176e321e663578d'])
 
   const multicall = new Multicall({
     multicallCustomContractAddress: networkConfig.helperContract.multiCall,
     ethersProvider: provider,
     tryAggregate: true,
   })
-
-  const poolsAddress = Object.keys(participationsValue).filter(
-    (pa) => !participations.includes(pa) && pa !== ZERO_ADDRESS && illegalParticipations.filter((p) => p.address === pa).length === 0,
-  )
-
+  // 0xd5277A33d1109842128852854176E321e663578d
+  // console.log(participations)
+  // console.log(illegalParticipations)
+  // provider.setStateOverride({})
+  let poolsAddress: string[] = []
+  Object.keys(participationsBalance).map((pa) => {
+    if (participations.includes(pa) || pa === ZERO_ADDRESS) return
+    Object.keys(participationsBalance[pa]).map((poolKey) => {
+      poolsAddress.push(poolKey)
+    })
+  })
+  poolsAddress = uniq(poolsAddress)
   const [{ results }] = await Promise.all([multicall.call(getMultiCallConfig(poolsAddress))])
+
   const poolConfigs: IPoolsConfig = {}
   Object.keys(results).map((key) => {
     const { callsReturnContext } = results[key]
-    if (!callsReturnContext[0].success) return
     const returnValues = callsReturnContext[0].returnValues
+    if (!callsReturnContext[0].success || returnValues[2] !== PLD_ADDRESS) return
     poolConfigs[key] = {
       fetcher: returnValues[0],
       oracle: '0x' + (returnValues[1] as String).slice(returnValues[1].length - 40, returnValues[1].length),
-      type: networkConfig.fetchers && networkConfig.fetchers[returnValues[0]].type.includes('3') ? 'uni3' : 'uni2',
-      QTI: returnValues[1][2] === 0 ? 0 : 1,
+      type: networkConfig.fetchers && networkConfig.fetchers[returnValues[0]]?.type.includes('3') ? 'uni3' : 'uni2',
+      QTI: returnValues[1][2] === '0' ? 0 : 1,
     }
   })
+
   const [{ results: rawPrices }] = await Promise.all([multicall.call(getMultiCallPrice(poolConfigs))])
   const poolsSpot: IPoolsSpot = {}
   Object.keys(rawPrices).map((key) => {
@@ -122,14 +140,66 @@ const main = async () => {
       const [r0, r1] = returnValues
       const [rq, rb] = poolConfigs[key].QTI === 0 ? [bn(r0), bn(r1)] : [bn(r1), bn(r0)]
       const spot = rq.shl(128).div(rb)
-      poolsSpot[poolConfigs[key].oracle] = spot.toString()
+      poolsSpot[poolConfigs[key].oracle] = spot
     } else {
       const sqrtPriceX96 = bn(returnValues[0])
       let spot = sqrtPriceX96.shl(32)
       spot = spot.mul(spot).shr(128)
-      poolsSpot[poolConfigs[key].oracle] = spot.toString()
+      poolsSpot[poolConfigs[key].oracle] = spot
     }
   })
-  console.log(poolsSpot)
+
+  const [{ results: rawPoolCompute }] = await Promise.all([multicall.call(getMultiCallCompute(poolConfigs, poolsSpot))])
+  const poolComputes: IPoolsCompute = {}
+  Object.keys(rawPoolCompute).map((key) => {
+    const { callsReturnContext } = rawPoolCompute?.[key]
+    const returnValues = callsReturnContext[0].returnValues
+    const parseData = parseMultiCallResponse(returnValues)
+    if (!parseData) return
+    const { rA, rB, rC, sA, sB, sC } = parseMultiCallResponse(returnValues)
+    poolComputes[key.toLowerCase()] = { rA, rB, rC, sA, sB, sC }
+  })
+  const participationsValue: { [address: string]: BigNumber } = {}
+  participations.map((pa) => {
+    if (!participationsBalance[pa]) return
+    if (!participationsValue[pa]) participationsValue[pa] = erc20Balance[pa] || bn(0)
+    Object.keys(participationsBalance[pa]).map((poolKey) => {
+      if (!poolComputes[poolKey]) return
+      Object.keys(participationsBalance[pa][poolKey]).map((side) => {
+        const rX =
+          Number(side) === POOL_IDS.A
+            ? poolComputes[poolKey].rA
+            : Number(side) === POOL_IDS.B
+            ? poolComputes[poolKey].rB
+            : poolComputes[poolKey].rC
+        const sX =
+          Number(side) === POOL_IDS.A
+            ? poolComputes[poolKey].sA
+            : Number(side) === POOL_IDS.B
+            ? poolComputes[poolKey].sB
+            : poolComputes[poolKey].sC
+        const value = participationsBalance[pa][poolKey][side].mul(rX).div(sX)
+        participationsValue[pa] = participationsValue[pa].add(value)
+      })
+    })
+  })
+  const arraya: { address: string; balance: string }[] = []
+  Object.keys(participationsValue).map((key) => {
+    arraya.push({
+      address: key,
+      balance: IEW(participationsValue[key]),
+    })
+  })
+  arraya.sort((a, b) => num(b.balance) - num(a.balance))
+
+  arraya.map((a) => {
+    console.log(a.address, num(a.balance))
+  })
 }
 main()
+
+// 0xd1f294227ed930993098914e829a176b6b1905d2
+// 0x03342265f292ac143f9c79dfee076332ae05769e
+// 0xd030eff6bcffcd4ef745450a16993ddac3eaf24a
+// 0x5fb0ce35c384434c7a905f430326d1135b6857c8
+// 0x446fed921f27fb001766cd4ac66ab866a22234eb

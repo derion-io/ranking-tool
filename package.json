@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "npx ts-node --files src/index.ts" ,
+    "dev": "npx ts-node --files src/index.ts",
     "build": "tsc",
     "pretty": "prettier --write \"./src/**/*.ts\""
   },
@@ -14,9 +14,10 @@
     "@ethersproject/providers": "https://gitpkg.now.sh/derivable-labs/ethers.js/packages/providers?master",
     "assisted-json-rpc-provider": "git+ssh://git@github.com:derivable-labs/AssistedJsonRpcProvider.git#dev",
     "dotenv": "^16.3.1",
-    "lodash": "^4.17.21",
     "ethereum-multicall": "^2.15.0",
     "ethers": "^5.5.4",
+    "lodash": "^4.17.21",
+    "move-decimal-point": "^0.0.4",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {

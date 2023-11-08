@@ -1840,6 +1840,11 @@ mkdirp@^0.5.1:
   dependencies:
     minimist "^1.2.6"
 
+move-decimal-point@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/move-decimal-point/-/move-decimal-point-0.0.4.tgz#29a6c0f07f60058380a79d58dae16bc90516e4c4"
+  integrity sha512-cZrpE/ykbwSmD0DnKAcKa49zaK5LaftD6DzpQDmjSMPRK6i4D4xvnVBCIuZXkpAqvon6DP9Oum2TcLZjclVB/Q==
+
 ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"

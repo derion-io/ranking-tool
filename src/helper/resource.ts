@@ -1,4 +1,4 @@
-import { IPool, IPoolsConfig, IPriceInfo } from '../types'
+import { IPool, IPoolsConfig, IPoolsSpot, IPriceInfo } from '../types'
 import TokenInfo from '../abi/TokensInfo.json'
 import View from '../abi/View.json'
 import { bn } from '../utils/utils'
@@ -58,5 +58,33 @@ export const getMultiCallPrice = (poolsConfigs: IPoolsConfig): ContractCallConte
     }
   })
   //   console.log(request)
+  return request
+}
+
+export const getMultiCallCompute = (
+  poolConfigs: IPoolsConfig,
+  poolsSpots: IPoolsSpot,
+  derivableToken: string = '0x0819281c74BeD5423C1B3283808F8E26AAd18DBe',
+): ContractCallContext[] => {
+  const request: ContractCallContext[] = []
+  Object.keys(poolConfigs).map((poolAddress, _) => {
+    request.push({
+      reference: poolAddress,
+      contractAddress: poolAddress,
+      abi: View.abi,
+      calls: [
+        {
+          reference: _.toString(),
+          methodName: 'compute',
+          methodParameters: [
+            derivableToken,
+            5,
+            poolsSpots[poolConfigs[poolAddress].oracle] || bn(0),
+            poolsSpots[poolConfigs[poolAddress].oracle] || bn(0),
+          ],
+        },
+      ],
+    })
+  })
   return request
 }

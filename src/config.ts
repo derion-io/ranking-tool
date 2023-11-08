@@ -9,6 +9,18 @@ export const Z2_ADDRESS = '0xc3E15702653704b8afc3A1dA39314CB3FE8B8A5D'
 export const ACCEPT_ADDERSSES = ['0x8Bd6072372189A12A2889a56b6ec982fD02b0B87', '0x8Bd6072372189A12A2889a56b6ec982fD02b0B87']
 export const CHAIN_ID = 56
 
+export const POOL_IDS = {
+  cToken: 131072,
+  cp: 65536,
+  token0: 262144,
+  token1: 262145,
+  native: 0x01,
+  R: 0x00,
+  A: 0x10,
+  B: 0x20,
+  C: 0x30,
+}
+
 export const DDL_CONFIGS_URL = {
   development: 'https://raw.githubusercontent.com/derivable-labs/configs/dev/',
   production: 'https://raw.githubusercontent.com/derivable-labs/configs/main/',
