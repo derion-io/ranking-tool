@@ -188,7 +188,7 @@ export const getRank = async () => {
   })
   arraya.sort((a, b) => num(b.balance) - num(a.balance))
   console.log(arraya)
-  return arraya
+  return { results: arraya, illegalParticipations }
 }
 
 // 0xd1f294227ed930993098914e829a176b6b1905d2
