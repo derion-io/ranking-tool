@@ -9,10 +9,16 @@ import { ILog, IPoolsCompute, IPoolsConfig, IPoolsSpot } from './types'
 import { IEW, bn, decodeERC1155TransferLog, decodeERC20TransferLog, num, parseMultiCallResponse } from './utils/utils'
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62'
-export const getRank = async () => {
+export const getRank = async (
+  getLogsInprogressCallBack?: (fromBlock: number, toBlock: number) => void,
+  getLogsCallBack?: (logsLength: number) => void,
+  participationsCallback?: (wallets: string[], illegalWallets: { address: String; reason: String; txHash: String }[]) => void,
+  computeCallBack?: () => void,
+) => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
   const currentBlock = 39305800
+  if (getLogsInprogressCallBack) getLogsInprogressCallBack(0, currentBlock)
   let logs: ILog[] = []
   logs = await provider.getLogs({
     fromBlock: 0,
@@ -20,6 +26,7 @@ export const getRank = async () => {
     address: [PLD_ADDRESS, POSITION_ADDRESS],
     topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
   })
+  if (getLogsCallBack) getLogsCallBack(logs.length)
   // const jsonData = JSON.stringify(logs, null, 2)
   // const filePath = 'logs.json'
   // fs.writeFileSync(filePath, jsonData)
@@ -93,8 +100,7 @@ export const getRank = async () => {
       })
     }
   })
-  // console.log(participationsBalance['0xd5277a33d1109842128852854176e321e663578d'])
-
+  if (participationsCallback) participationsCallback(participations, illegalParticipations)
   const multicall = new Multicall({
     multicallCustomContractAddress: networkConfig.helperContract.multiCall,
     ethersProvider: provider,
@@ -179,6 +185,7 @@ export const getRank = async () => {
       })
     })
   })
+  if (computeCallBack) computeCallBack()
   const arraya: { address: string; balance: string }[] = []
   Object.keys(participationsValue).map((key) => {
     arraya.push({
