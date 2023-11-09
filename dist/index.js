@@ -201,8 +201,7 @@ const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participation
         });
     });
     arraya.sort((a, b) => (0, utils_1.num)(b.balance) - (0, utils_1.num)(a.balance));
-    console.log(arraya);
-    return { results: arraya, illegalParticipations };
+    return { results: arraya, illegalParticipations: illegalParticipations };
 };
 exports.getRank = getRank;
 // 0xd1f294227ed930993098914e829a176b6b1905d2
