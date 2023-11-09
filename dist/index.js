@@ -9,10 +9,12 @@ const rpc_1 = require("./helper/rpc");
 const utils_1 = require("./utils/utils");
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
-const getRank = async () => {
+const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participationsCallback, computeCallBack) => {
     const { networkConfig, uniV3Pools } = await (0, config_1.loadConfig)(config_1.CHAIN_ID);
     const provider = (0, rpc_1.getRPC)(networkConfig);
     const currentBlock = 39305800;
+    if (getLogsInprogressCallBack)
+        getLogsInprogressCallBack(0, currentBlock);
     let logs = [];
     logs = await provider.getLogs({
         fromBlock: 0,
@@ -20,6 +22,8 @@ const getRank = async () => {
         address: [config_1.PLD_ADDRESS, config_1.POSITION_ADDRESS],
         topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
     });
+    if (getLogsCallBack)
+        getLogsCallBack(logs.length);
     // const jsonData = JSON.stringify(logs, null, 2)
     // const filePath = 'logs.json'
     // fs.writeFileSync(filePath, jsonData)
@@ -99,7 +103,8 @@ const getRank = async () => {
             });
         }
     });
-    // console.log(participationsBalance['0xd5277a33d1109842128852854176e321e663578d'])
+    if (participationsCallback)
+        participationsCallback(participations, illegalParticipations);
     const multicall = new ethereum_multicall_1.Multicall({
         multicallCustomContractAddress: networkConfig.helperContract.multiCall,
         ethersProvider: provider,
@@ -186,6 +191,8 @@ const getRank = async () => {
             });
         });
     });
+    if (computeCallBack)
+        computeCallBack();
     const arraya = [];
     Object.keys(participationsValue).map((key) => {
         arraya.push({
@@ -195,7 +202,7 @@ const getRank = async () => {
     });
     arraya.sort((a, b) => (0, utils_1.num)(b.balance) - (0, utils_1.num)(a.balance));
     console.log(arraya);
-    return arraya;
+    return { results: arraya, illegalParticipations };
 };
 exports.getRank = getRank;
 // 0xd1f294227ed930993098914e829a176b6b1905d2
