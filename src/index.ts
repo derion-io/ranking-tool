@@ -2,7 +2,6 @@ import { Multicall } from 'ethereum-multicall'
 import { BigNumber } from 'ethers'
 import fs from 'fs'
 import { uniq } from 'lodash'
-import logsCache from '../logs.json'
 import { CHAIN_ID, PLD_ADDRESS, POOL_IDS, POSITION_ADDRESS, Z2_ADDRESS, ZERO_ADDRESS, loadConfig } from './config'
 import { getMultiCallCompute, getMultiCallConfig, getMultiCallPrice } from './helper/resource'
 import { getRPC } from './helper/rpc'
@@ -14,19 +13,16 @@ export const getRank = async () => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
   const currentBlock = 39305800
-  let logs: ILog[] = logsCache || []
-  if (logsCache.length === 0) {
-    logs = await provider.getLogs({
-      fromBlock: 0,
-      toBlock: currentBlock,
-      address: [PLD_ADDRESS, POSITION_ADDRESS],
-      topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
-    })
-    const jsonData = JSON.stringify(logs, null, 2)
-
-    const filePath = 'logs.json'
-    fs.writeFileSync(filePath, jsonData)
-  }
+  let logs: ILog[] = []
+  logs = await provider.getLogs({
+    fromBlock: 0,
+    toBlock: currentBlock,
+    address: [PLD_ADDRESS, POSITION_ADDRESS],
+    topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
+  })
+  // const jsonData = JSON.stringify(logs, null, 2)
+  // const filePath = 'logs.json'
+  // fs.writeFileSync(filePath, jsonData)
   const erc20Balance: { [address: string]: BigNumber } = {}
   const logGroups: { [txHash: string]: ILog[] } = logs.reduce((result: any, log) => {
     if (!result[log.transactionHash]) {

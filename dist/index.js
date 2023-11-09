@@ -1,13 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRank = void 0;
 const ethereum_multicall_1 = require("ethereum-multicall");
-const fs_1 = __importDefault(require("fs"));
 const lodash_1 = require("lodash");
-const logs_json_1 = __importDefault(require("../logs.json"));
 const config_1 = require("./config");
 const resource_1 = require("./helper/resource");
 const rpc_1 = require("./helper/rpc");
@@ -18,18 +13,16 @@ const getRank = async () => {
     const { networkConfig, uniV3Pools } = await (0, config_1.loadConfig)(config_1.CHAIN_ID);
     const provider = (0, rpc_1.getRPC)(networkConfig);
     const currentBlock = 39305800;
-    let logs = logs_json_1.default || [];
-    if (logs_json_1.default.length === 0) {
-        logs = await provider.getLogs({
-            fromBlock: 0,
-            toBlock: currentBlock,
-            address: [config_1.PLD_ADDRESS, config_1.POSITION_ADDRESS],
-            topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
-        });
-        const jsonData = JSON.stringify(logs, null, 2);
-        const filePath = 'logs.json';
-        fs_1.default.writeFileSync(filePath, jsonData);
-    }
+    let logs = [];
+    logs = await provider.getLogs({
+        fromBlock: 0,
+        toBlock: currentBlock,
+        address: [config_1.PLD_ADDRESS, config_1.POSITION_ADDRESS],
+        topics: [[ERC20_TRANSFER_TOPIC, ERC1155_TRANSFER_TOPIC]],
+    });
+    // const jsonData = JSON.stringify(logs, null, 2)
+    // const filePath = 'logs.json'
+    // fs.writeFileSync(filePath, jsonData)
     const erc20Balance = {};
     const logGroups = logs.reduce((result, log) => {
         if (!result[log.transactionHash]) {
