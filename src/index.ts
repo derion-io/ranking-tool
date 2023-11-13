@@ -1,6 +1,5 @@
 import { Multicall } from 'ethereum-multicall'
 import { BigNumber } from 'ethers'
-import fs from 'fs'
 import { uniq } from 'lodash'
 import { CHAIN_ID, PLD_ADDRESS, POOL_IDS, POSITION_ADDRESS, Z2_ADDRESS, ZERO_ADDRESS, loadConfig } from './config'
 import { getMultiCallCompute, getMultiCallConfig, getMultiCallPrice } from './helper/resource'
@@ -12,8 +11,14 @@ const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c0
 export const getRank = async (
   getLogsInprogressCallBack?: (fromBlock: number, toBlock: number) => void,
   getLogsCallBack?: (logsLength: number) => void,
+
+  getPriceInprogressCallBack?: (pool: string[]) => void,
+  getPricesCallBack?: (poolsSpot: IPoolsSpot) => void,
+
   participationsCallback?: (wallets: string[], illegalWallets: { address: String; reason: String; txHash: String }[]) => void,
-  computeCallBack?: () => void,
+
+  computeInprogressCallBack?: (computes: string[]) => void,
+  computeCallBack?: (computesValue: string[]) => void,
 ) => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
@@ -118,6 +123,7 @@ export const getRank = async (
     })
   })
   poolsAddress = uniq(poolsAddress)
+  if (getPriceInprogressCallBack) getPriceInprogressCallBack(poolsAddress)
   const [{ results }] = await Promise.all([multicall.call(getMultiCallConfig(poolsAddress))])
 
   const poolConfigs: IPoolsConfig = {}
@@ -150,9 +156,10 @@ export const getRank = async (
       poolsSpot[poolConfigs[key].oracle] = spot
     }
   })
-
+  if (getPricesCallBack) getPricesCallBack(poolsSpot)
   const [{ results: rawPoolCompute }] = await Promise.all([multicall.call(getMultiCallCompute(poolConfigs, poolsSpot))])
   const poolComputes: IPoolsCompute = {}
+  if (computeInprogressCallBack) computeInprogressCallBack(Object.keys(rawPoolCompute))
   Object.keys(rawPoolCompute).map((key) => {
     const { callsReturnContext } = rawPoolCompute?.[key]
     const returnValues = callsReturnContext[0].returnValues
@@ -185,7 +192,7 @@ export const getRank = async (
       })
     })
   })
-  if (computeCallBack) computeCallBack()
+  if (computeCallBack) computeCallBack(Object.keys(participationsValue))
   const arraya: { address: string; balance: string }[] = []
   Object.keys(participationsValue).map((key) => {
     arraya.push({
