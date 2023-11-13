@@ -9,7 +9,7 @@ const rpc_1 = require("./helper/rpc");
 const utils_1 = require("./utils/utils");
 const ERC20_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
-const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participationsCallback, computeCallBack) => {
+const getRank = async (getLogsInprogressCallBack, getLogsCallBack, getPriceInprogressCallBack, getPricesCallBack, participationsCallback, computeInprogressCallBack, computeCallBack) => {
     const { networkConfig, uniV3Pools } = await (0, config_1.loadConfig)(config_1.CHAIN_ID);
     const provider = (0, rpc_1.getRPC)(networkConfig);
     const currentBlock = 39305800;
@@ -123,6 +123,8 @@ const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participation
         });
     });
     poolsAddress = (0, lodash_1.uniq)(poolsAddress);
+    if (getPriceInprogressCallBack)
+        getPriceInprogressCallBack(poolsAddress);
     const [{ results }] = await Promise.all([multicall.call((0, resource_1.getMultiCallConfig)(poolsAddress))]);
     const poolConfigs = {};
     Object.keys(results).map((key) => {
@@ -155,8 +157,12 @@ const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participation
             poolsSpot[poolConfigs[key].oracle] = spot;
         }
     });
+    if (getPricesCallBack)
+        getPricesCallBack(poolsSpot);
     const [{ results: rawPoolCompute }] = await Promise.all([multicall.call((0, resource_1.getMultiCallCompute)(poolConfigs, poolsSpot))]);
     const poolComputes = {};
+    if (computeInprogressCallBack)
+        computeInprogressCallBack(Object.keys(rawPoolCompute));
     Object.keys(rawPoolCompute).map((key) => {
         const { callsReturnContext } = rawPoolCompute?.[key];
         const returnValues = callsReturnContext[0].returnValues;
@@ -192,7 +198,7 @@ const getRank = async (getLogsInprogressCallBack, getLogsCallBack, participation
         });
     });
     if (computeCallBack)
-        computeCallBack();
+        computeCallBack(Object.keys(participationsValue));
     const arraya = [];
     Object.keys(participationsValue).map((key) => {
         arraya.push({
