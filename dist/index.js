@@ -12,7 +12,7 @@ const ERC1155_TRANSFER_TOPIC = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c0
 const getRank = async (getLogsInprogressCallBack, getLogsCallBack, getPriceInprogressCallBack, getPricesCallBack, participationsCallback, computeInprogressCallBack, computeCallBack) => {
     const { networkConfig, uniV3Pools } = await (0, config_1.loadConfig)(config_1.CHAIN_ID);
     const provider = (0, rpc_1.getRPC)(networkConfig);
-    const currentBlock = 39305800;
+    const currentBlock = 33510200;
     if (getLogsInprogressCallBack)
         getLogsInprogressCallBack(0, currentBlock);
     let logs = [];
