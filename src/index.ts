@@ -22,7 +22,7 @@ export const getRank = async (
 ) => {
   const { networkConfig, uniV3Pools } = await loadConfig(CHAIN_ID)
   const provider = getRPC(networkConfig)
-  const currentBlock = 39305800
+  const currentBlock = 33510200
   if (getLogsInprogressCallBack) getLogsInprogressCallBack(0, currentBlock)
   let logs: ILog[] = []
   logs = await provider.getLogs({
