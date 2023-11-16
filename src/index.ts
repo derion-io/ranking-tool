@@ -153,7 +153,7 @@ export const getRank = async (
       const sqrtPriceX96 = bn(returnValues[0])
       let spot = sqrtPriceX96.shl(32)
       spot = spot.mul(spot).shr(128)
-      poolsSpot[poolConfigs[key].oracle] = spot
+      poolsSpot[poolConfigs[key].oracle] = poolConfigs[key].QTI === 0 ? bn(1).shl(256).div(spot) : spot
     }
   })
   if (getPricesCallBack) getPricesCallBack(poolsSpot)
